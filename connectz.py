@@ -58,6 +58,7 @@ class ImportGame:
         self.file_object = self.file.open(encoding="ascii")
         header = self.file_object.readline().rstrip("\n")
         setup = self.file_object.readline().rstrip("\n")
+
         self.width, self.height, self.winning_moves, *bad_args = map(
             int, setup.split(" ")
         )
