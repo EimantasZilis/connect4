@@ -40,61 +40,43 @@ class ArgParser:
             sys.exit("9")
 
 
-class ImportGame:
-    """
-    A class for importing game from file.
-    It reads the input file, validates that file contents
-    are correct and parses the information within.
-    """
+class GameBoard:
+    def __init__(
+        self, width: int, height: int, winning_moves: int, file_object
+    ) -> None:
+        self.file_object = file_object
+        self.winning_moves = winning_moves
+        self.board = [[None for col in range(width)] for row in range(height)]
+        self.turn = 1  # Specifies if it's player turn 1 or 2
 
-    def __init__(self, file: Path) -> None:
-        self.file = file
-        self.columns = None
-        self.rows = None
-        self.winning_moves = None
+    def player_moves(self) -> int:
+        """A generator method which reads and returns moves made by players"""
+        for next_move in self.file_object:
+            next_move = next_move.rstrip("\n")
+            try:
+                next_move = int(next_move)
+            except ValueError:
+                # Moves should only be denoted by a digit
+                sys.exit("8")
 
-    def __enter__(self) -> None:
-        """Read game setup from file"""
-        self.file_object = self.file.open(encoding="ascii")
-        header = self.file_object.readline().rstrip("\n")
-        setup = self.file_object.readline().rstrip("\n")
-
-        self.width, self.height, self.winning_moves, *bad_args = map(
-            int, setup.split(" ")
-        )
-
-        if header != "X Y Z":
-            # Invalid headers
-            sys.exit("8-1")
-        elif bad_args:
-            # There shouldn't be any more than 3 args
-            sys.exit("8-2")
-
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
-        """Close file"""
-        self.file_object.close()
-
-    def next_move(self):
-        """Generator method to read file line-by-line"""
-        # Skip the first two lines and go straight to the moves
-        next(self.file_object)
-        next(self.file_object)
-
-        for line in self.file_object:
-            stripped_line = line.rstrip("\n")
-            print(stripped_line)
-            yield int(stripped_line)
+            if next_move <= 0:
+                # It doesn't make sense to have a column <= 0
+                sys.exit("8")
+            else:
+                yield next_move
 
 
 def main() -> None:
     arg_parser = ArgParser()
     file = arg_parser.get_file()
 
-    with ImportGame(file) as game:
-        pass
-
-        # for move in game_setup.moves:
-        # print(move)
+    with file.open(encoding="ascii") as file_object:
+        header = next(file_object).rstrip("\n")
+        setup = next(file_object).rstrip("\n")
+        width, height, winning_moves, *_ = map(int, setup.split(" "))
+        board = GameBoard(width, height, winning_moves, file_object)
+        for move in board.player_moves():
+            print(move)
 
 
 if __name__ == "__main__":
