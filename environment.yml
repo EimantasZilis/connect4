@@ -1,0 +1,12 @@
+name: connect4
+channels:
+  - anaconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.6             # PSF
+  - pip>=20.3.1             # MIT
+  - pip:
+    - isort==5.8.0          # MIT
+    - autoflake==1.4        # MIT
+    - black==21.5b1         # MIT
