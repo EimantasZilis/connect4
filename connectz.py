@@ -1,6 +1,8 @@
 import argparse
 import sys
+from itertools import cycle
 from pathlib import Path
+from typing import List
 
 
 class ArgParser:
@@ -47,11 +49,15 @@ class GameBoard:
         self.file_object = file_object
         self.winning_moves = winning_moves
         self.board = [[None for col in range(width)] for row in range(height)]
-        self.turn = 1  # Specifies if it's player turn 1 or 2
+        self.player = cycle(range(1, 3))  #  The turn of the player (1 or 2)
 
-    def player_moves(self) -> int:
-        """A generator method which reads and returns moves made by players"""
+    def make_move(self, move: int):
+        pass
+
+    def get_player_moves(self) -> List[int]:
+        """Return a list of tuples containing (Player, Move)"""
         for next_move in self.file_object:
+            self.player = next(self.player)
             next_move = next_move.rstrip("\n")
             try:
                 next_move = int(next_move)
@@ -74,9 +80,10 @@ def main() -> None:
         header = next(file_object).rstrip("\n")
         setup = next(file_object).rstrip("\n")
         width, height, winning_moves, *_ = map(int, setup.split(" "))
+
         board = GameBoard(width, height, winning_moves, file_object)
-        for move in board.player_moves():
-            print(move)
+        for move in board.get_player_moves():
+            board.make_move(move)
 
 
 if __name__ == "__main__":
