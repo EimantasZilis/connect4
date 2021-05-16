@@ -197,6 +197,9 @@ class GameBoard(GameChecker):
         self.height = height
 
     def make_move(self, move: int) -> None:
+        """
+        Make a move and mark it on the board.
+        """
         column = move - 1
         try:
             # Find the first blank position along the column for next move
@@ -232,8 +235,9 @@ class GameBoard(GameChecker):
 
     def finish_game(self) -> None:
         """
-        Perform final evaluations at the end of the game
-        to determine output code"""
+        Perform final evaluations at the end
+        of the game to determine output code
+        """
         if self.winner is None and self.total_moves < self.width * self.height:
             # Game is not finished, but no further moves were made
             sys.exit("3")
