@@ -49,9 +49,12 @@ class GameChecker:
             # Only start checking for wins if the first player has
             # managed to put the lowest possible winning moves
             self.check_vertical_line()
+            self.check_left_diagonal_line()
+            self.check_right_diagonal_line()
+            self.check_horizontal_line()
 
     def check_line_for_win(self, line: Optional[int]) -> None:
-        """Check if the current player has won based on the given line"""
+        """Check if the current player has won based on a given line"""
         for position in reversed(range(self.winning_moves)):
             # Loop backwards through line positions starting
             # from the checker that was added in this turn.
@@ -64,12 +67,12 @@ class GameChecker:
                 # Ran out of available positions on the board to check.
                 return
 
-            # The line has been checked successfully without:
-            # 1. running out of positions on the board
-            # 2. without having any blank or other player's checkers in a row
-            # The current player has won the game.
-            print("WIN!")
-            sys.exit(f"{self.current_player}")
+        # The line has been checked successfully without:
+        # 1. running out of positions on the board
+        # 2. without having any blank or other player's checkers in a row
+        # The current player has won the game.
+        print("WIN!")
+        sys.exit(f"{self.current_player}")
 
     def get_vertical_line(self):
         """
@@ -85,6 +88,15 @@ class GameChecker:
         """
         line = self.get_vertical_line()
         self.check_line_for_win(line)
+
+    def check_left_diagonal_line(self) -> None:
+        pass
+
+    def check_right_diagonal_line(self) -> None:
+        pass
+
+    def check_horizontal_line(self) -> None:
+        pass
 
 
 class GameBoard(GameChecker):
@@ -169,6 +181,9 @@ def main() -> None:
             board.make_move(move)
             board.print_internal_board()
             board.check_for_wins()
+
+        print(f" >> DRAW")
+        sys.exit("0")
 
 
 if __name__ == "__main__":
