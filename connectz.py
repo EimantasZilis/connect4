@@ -55,16 +55,16 @@ class GameChecker:
 
     def check_line_for_win(self, line: Optional[int]) -> None:
         """Check if the current player has won based on a given line"""
+        if len(line) < self.winning_moves:
+            # The line isn't long enough to be able to win
+            return
+
         for position in reversed(range(self.winning_moves)):
             # Loop backwards through line positions starting
             # from the checker that was added in this turn.
-            try:
-                if line[position] != self.current_player:
-                    # There's a checker belonging to another player. You
-                    # won't get a winning number of checkers in a row
-                    return
-            except IndexError:
-                # Ran out of available positions on the board to check.
+            if line[position] != self.current_player:
+                # There's a checker belonging to another player. You
+                # won't get a winning number of checkers in a row
                 return
 
         # The line has been checked successfully without:
@@ -74,26 +74,55 @@ class GameChecker:
         print("WIN!")
         sys.exit(f"{self.current_player}")
 
-    def get_vertical_line(self):
-        """
-        Get a line of checkers in a column including
-        the one that was added in this turn
-        """
-        return self.board[self.current_column][: self.current_row + 1]
-
     def check_vertical_line(self):
         """
         Check if the player has one by looking at
         the column that has a new checker
         """
-        line = self.get_vertical_line()
+        #  Get a line of checkers in a column with the one recently added
+        line = self.board[self.current_column][: self.current_row + 1]
+        self.check_line_for_win(line)
+
+    def get_diagonal_line(self, orientation="right") -> Optional[int]:
+        """
+        Get a diagonal line pointing downwards. Orientation
+        specifies if the diagonal is pointing "left" or "right".
+        """
+        line = []
+
+        def column_value(position):
+            if orientation == "right":
+                return self.current_column + position
+            elif orientation == "left":
+                return self.current_column - position
+
+        try:
+            for psn in range(self.max_diagonal_length):
+                row = self.current_row - psn
+                column = column_value(psn)
+                line.append(self.board[column][row])
+        except IndexError:
+            # Ran out of cols/rows.
+            # It has already built a full diagonal line
+            pass
+        finally:
+            return line
+
+    def check_right_diagonal_line(self) -> None:
+        """
+        Check if the player has won by looking at the right
+        diagonal pointing downwards starting with a new checker
+        """
+        line = self.get_diagonal_line(orientation="right")
         self.check_line_for_win(line)
 
     def check_left_diagonal_line(self) -> None:
-        pass
-
-    def check_right_diagonal_line(self) -> None:
-        pass
+        """
+        Check if the player has won by looking at the left
+        diagonal pointing downwards starting with a new checker
+        """
+        line = self.get_diagonal_line(orientation="left")
+        self.check_line_for_win(line)
 
     def check_horizontal_line(self) -> None:
         pass
@@ -113,6 +142,9 @@ class GameBoard(GameChecker):
         self.current_column = None
         self.current_row = None
         self.total_moves = 0
+
+        # The maximum number of items in a diagonal line to check
+        self.max_diagonal_length = min(height, width)
 
     def make_move(self, move: int):
         column = move - 1
@@ -179,10 +211,11 @@ def main() -> None:
         board = GameBoard(width, height, winning_moves, file_object)
         for move in board.get_player_moves():
             board.make_move(move)
-            board.print_internal_board()
+            # board.print_internal_board()
             board.check_for_wins()
+            # print(50*"*")
 
-        print(f" >> DRAW")
+        print(f"\n >> DRAW")
         sys.exit("0")
 
 
