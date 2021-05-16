@@ -254,10 +254,11 @@ class GameBoard(GameChecker):
         print()
 
 
-def main() -> None:
-    arg_parser = ArgParser()
-    file = arg_parser.get_file()
-
+def play_game(file: Path) -> None:
+    """
+    Start the game by reading the file and making the moves.
+    It will check if the game has been won.
+    """
     with file.open(encoding="ascii") as file_object:
         try:
             next(file_object).rstrip("\n")
@@ -282,6 +283,16 @@ def main() -> None:
                 sys.exit("4")
 
         board.finish_game()
+
+
+def main() -> None:
+    arg_parser = ArgParser()
+    file = arg_parser.get_file()
+    try:
+        play_game(file)
+    except (OSError, IOError, UnicodeError):
+        # There are some issues opening and reading the file
+        sys.exit("9")
 
 
 if __name__ == "__main__":
