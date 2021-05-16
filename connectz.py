@@ -190,6 +190,7 @@ class GameBoard(GameChecker):
         # The maximum number of items in a diagonal line to check
         self.max_diagonal_length = min(height, width)
         self.width = width
+        self.height = height
 
     def make_move(self, move: int):
         column = move - 1
@@ -225,6 +226,20 @@ class GameBoard(GameChecker):
             else:
                 yield next_move
 
+    def finish_game(self):
+        """
+        Perform final evaluations at the end of the game
+        to determine output code"""
+        if self.winner is None and self.total_moves < self.width * self.height:
+            # Game is not finished, but no further moves were made
+            sys.exit("3")
+        if self.winner is None:
+            # Draw
+            sys.exit("0")
+        else:
+            # Game winner
+            sys.exit(self.winner)
+
     def print_real_board(self):
         real_board = list(map(list, zip(*self.board)))
         self._print_board(real_board)
@@ -244,10 +259,14 @@ def main() -> None:
     file = arg_parser.get_file()
 
     with file.open(encoding="ascii") as file_object:
-        header = next(file_object).rstrip("\n")
-        setup = next(file_object).rstrip("\n")
-        width, height, winning_moves, *_ = map(int, setup.split(" "))
+        try:
+            next(file_object).rstrip("\n")
+            setup = next(file_object).rstrip("\n")
+        except StopIteration:
+            # File contents do not meet expected format
+            sys.exit("8")
 
+        width, height, winning_moves, *_ = map(int, setup.split(" "))
         if width < winning_moves and height < winning_moves:
             # Illegal game. Game can never be won, because
             # there are not enough rows/columns.
@@ -262,10 +281,7 @@ def main() -> None:
                 # Trying to make an illegal move
                 sys.exit("4")
 
-        if board.winner is None:
-            sys.exit("0")
-        else:
-            sys.exit(board.winner)
+        board.finish_game()
 
 
 if __name__ == "__main__":
