@@ -2,7 +2,7 @@ import argparse
 import sys
 from itertools import cycle, tee
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 
 def sliding_window(iterable, size) -> Optional[int]:
@@ -245,6 +245,21 @@ class GameBoard(GameChecker):
             sys.exit(self.winner)
 
 
+def parse_file_header(header: List[str], setup: List[str]) -> Tuple[int]:
+    """
+    Given header and setup lists, parse the information
+    into board width, height and winning moves.
+    """
+    for header_item, setup_item in zip(header, setup):
+        if header_item == "X":
+            width = int(setup_item)
+        elif header_item == "Y":
+            height = int(setup_item)
+        elif header_item == "Z":
+            winning_moves = int(setup_item)
+    return width, height, winning_moves
+
+
 def play_game(file: Path) -> None:
     """
     Start the game by reading the file and making the moves.
@@ -252,13 +267,14 @@ def play_game(file: Path) -> None:
     """
     with file.open(encoding="ascii") as file_object:
         try:
-            next(file_object).rstrip("\n")
-            setup = next(file_object).rstrip("\n")
+            header = next(file_object).rstrip("\n").split(" ")
+            setup = next(file_object).rstrip("\n").split(" ")
         except StopIteration:
             # File contents do not meet expected format
             sys.exit("8")
 
-        width, height, winning_moves, *_ = map(int, setup.split(" "))
+        # Make sure you get the right details from the headers
+        width, height, winning_moves, = parse_file_header(header, setup)
         if width < winning_moves and height < winning_moves:
             # Illegal game. Game can never be won, because
             # there are not enough rows/columns.
