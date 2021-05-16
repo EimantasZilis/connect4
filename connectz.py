@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, Optional
 
 
-def sliding_window(iterable, size):
+def sliding_window(iterable, size) -> Optional[int]:
     """
     Applies a sliding window of a given size to an iterable
     and returns (every) smaller list that can fit into an iterable"""
@@ -36,7 +36,7 @@ class ArgParser:
         It makes sure that the file also exists.
         """
         self._validate_inputfilename()
-        return self._validate_path()
+        return Path(self.args.inputfilename)
 
     def _validate_inputfilename(self) -> None:
         """
@@ -46,18 +46,15 @@ class ArgParser:
         if self.args.inputfilename is None:
             sys.exit("connectz.py: Provide one input file")
 
-    def _validate_path(self) -> Path:
-        """
-        Validate that inputfilename argument is a path and that it exists
-        """
-        input_file = Path(self.args.inputfilename)
-        if input_file.exists():
-            return input_file
-        else:
-            sys.exit("9")
-
 
 class GameChecker:
+    """
+    A class for checking if the game has been won.
+    It looks at all lines around a recent checker and
+    checks if there are any lines that have a winning
+    number of checkers belonging to the same player.
+    """
+
     def check_for_wins(self) -> None:
         """Check if the game has been won"""
         if self.total_moves >= 2 * self.winning_moves - 1:
@@ -92,7 +89,7 @@ class GameChecker:
         self.winner = str(self.current_player)
         raise GameWinner(f"{self.current_player}")
 
-    def check_vertical_line(self):
+    def check_vertical_line(self) -> None:
         """
         Check if the player has one by looking at
         the column that has a new checker
@@ -101,7 +98,7 @@ class GameChecker:
         line = self.board[self.current_column][: self.current_row + 1]
         self.check_line_for_win(line)
 
-    def get_diagonal_line(self, orientation="right") -> Optional[int]:
+    def get_diagonal_line(self, orientation: str = "right") -> Optional[int]:
         """
         Get a diagonal line pointing downwards. Orientation
         specifies if the diagonal is pointing "left" or "right".
@@ -172,6 +169,10 @@ class GameChecker:
 
 
 class GameBoard(GameChecker):
+    """
+    A class to setup the game board and carry out the moves.
+    """
+
     def __init__(
         self, width: int, height: int, winning_moves: int, file_object
     ) -> None:
@@ -192,7 +193,7 @@ class GameBoard(GameChecker):
         self.width = width
         self.height = height
 
-    def make_move(self, move: int):
+    def make_move(self, move: int) -> None:
         column = move - 1
         try:
             # Find the first blank position along the column for next move
@@ -226,7 +227,7 @@ class GameBoard(GameChecker):
             else:
                 yield next_move
 
-    def finish_game(self):
+    def finish_game(self) -> None:
         """
         Perform final evaluations at the end of the game
         to determine output code"""
@@ -239,19 +240,6 @@ class GameBoard(GameChecker):
         else:
             # Game winner
             sys.exit(self.winner)
-
-    def print_real_board(self):
-        real_board = list(map(list, zip(*self.board)))
-        self._print_board(real_board)
-
-    def print_internal_board(self):
-        self._print_board(self.board)
-
-    @staticmethod
-    def _print_board(board):
-        for row in board:
-            print(row)
-        print()
 
 
 def play_game(file: Path) -> None:
