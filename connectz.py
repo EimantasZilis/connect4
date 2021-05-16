@@ -1,8 +1,23 @@
 import argparse
 import sys
-from itertools import cycle
+from itertools import cycle, tee
 from pathlib import Path
 from typing import List, Optional
+
+
+def sliding_window(iterable, size):
+    """
+    Applies a sliding window of a given size to an iterable
+    and returns (every) smaller list that can fit into an iterable"""
+    iters = tee(iterable, size)
+    for i in range(1, size):
+        for each in iters[i:]:
+            next(each)
+    return zip(*iters)
+
+
+class GameWinner(Exception):
+    """An exception to indicate that the game has been won"""
 
 
 class ArgParser:
@@ -48,10 +63,13 @@ class GameChecker:
         if self.total_moves >= 2 * self.winning_moves - 1:
             # Only start checking for wins if the first player has
             # managed to put the lowest possible winning moves
-            self.check_vertical_line()
-            self.check_left_diagonal_line()
-            self.check_right_diagonal_line()
-            self.check_horizontal_line()
+            try:
+                self.check_vertical_line()
+                self.check_left_diagonal_line()
+                self.check_right_diagonal_line()
+                self.check_horizontal_lines()
+            except GameWinner as e:
+                self.winner = e
 
     def check_line_for_win(self, line: Optional[int]) -> None:
         """Check if the current player has won based on a given line"""
@@ -71,8 +89,8 @@ class GameChecker:
         # 1. running out of positions on the board
         # 2. without having any blank or other player's checkers in a row
         # The current player has won the game.
-        print("WIN!")
-        sys.exit(f"{self.current_player}")
+        self.winner = str(self.current_player)
+        raise GameWinner(f"{self.current_player}")
 
     def check_vertical_line(self):
         """
@@ -124,8 +142,33 @@ class GameChecker:
         line = self.get_diagonal_line(orientation="left")
         self.check_line_for_win(line)
 
-    def check_horizontal_line(self) -> None:
-        pass
+    def check_horizontal_lines(self) -> None:
+        """
+        Check if the player has won by looking at the horizonal
+        line that the new checker has been put in"""
+
+        # If the board width is bigger than the number of winning
+        # moves required, there is more than one way to build a line.
+        # Apply a sliding window along row to find every possible
+        # line and check if it has a winning combination.
+
+        # Get the first possible column to check
+        first_col = self.current_column - self.winning_moves
+        actual_starting_col = 0 if first_col < 0 else first_col
+
+        # Get the last possible column to check
+        last_col = self.current_column + self.winning_moves
+        actual_finishing_col = self.width if last_col > self.width else last_col
+
+        row = [
+            self.board[column][self.current_row]
+            for column in range(actual_starting_col, actual_finishing_col)
+        ]
+
+        # Get every possible line of length self.winning_moves
+        # by applying a slidng window to the row
+        for line in sliding_window(row, self.winning_moves):
+            self.check_line_for_win(line)
 
 
 class GameBoard(GameChecker):
@@ -137,6 +180,7 @@ class GameBoard(GameChecker):
         self.player = cycle(range(1, 3))  #  Alternate player turn (1 or 2)
 
         self.board = [[None for row in range(height)] for col in range(width)]
+        self.winner = None
 
         self.current_player = None
         self.current_column = None
@@ -145,6 +189,7 @@ class GameBoard(GameChecker):
 
         # The maximum number of items in a diagonal line to check
         self.max_diagonal_length = min(height, width)
+        self.width = width
 
     def make_move(self, move: int):
         column = move - 1
@@ -165,7 +210,7 @@ class GameBoard(GameChecker):
             self.board[column][row] = self.current_player
 
     def get_player_moves(self) -> List[int]:
-        """Return a list of tuples containing (Player, Move)"""
+        """A generator which returns next player moves"""
         for next_move in self.file_object:
             next_move = next_move.rstrip("\n")
             try:
@@ -210,13 +255,17 @@ def main() -> None:
 
         board = GameBoard(width, height, winning_moves, file_object)
         for move in board.get_player_moves():
-            board.make_move(move)
-            # board.print_internal_board()
-            board.check_for_wins()
-            # print(50*"*")
+            if board.winner is None:
+                board.make_move(move)
+                board.check_for_wins()
+            else:
+                # Trying to make an illegal move
+                sys.exit("4")
 
-        print(f"\n >> DRAW")
-        sys.exit("0")
+        if board.winner is None:
+            sys.exit("0")
+        else:
+            sys.exit(board.winner)
 
 
 if __name__ == "__main__":
