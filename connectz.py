@@ -26,7 +26,7 @@ class ArgParser:
     def __init__(self) -> None:
         parser = argparse.ArgumentParser(description="Connect Z")
         parser.add_argument(
-            "inputfilename", type=str, nargs="?", help="Enter file name"
+            "inputfilename", type=str, nargs="*", help="Enter file name"
         )
         self.args = parser.parse_args()
 
@@ -35,16 +35,19 @@ class ArgParser:
         Get file from inputfilename argument.
         It makes sure that the file also exists.
         """
-        self._validate_inputfilename()
-        return Path(self.args.inputfilename)
+        input_file = self._validate_inputfilename()
+        return Path(input_file)
 
     def _validate_inputfilename(self) -> None:
         """
-        Validate that inputfilename argument is specified.
+        Validate that one inputfilename argument is specified.
         It stops the program otherwise.
         """
-        if self.args.inputfilename is None:
+        input_file, *bad_params = self.args.inputfilename
+        if input_file is None or bad_params:
             sys.exit("connectz.py: Provide one input file")
+        else:
+            return input_file
 
 
 class GameChecker:
@@ -279,7 +282,7 @@ def main() -> None:
     try:
         play_game(file)
     except (OSError, IOError, UnicodeError):
-        # There are some issues opening and reading the file
+        # There are some issues with opening or reading the file
         sys.exit("9")
 
 
