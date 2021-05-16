@@ -2,7 +2,7 @@ import argparse
 import sys
 from itertools import cycle
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 
 class ArgParser:
@@ -42,30 +42,71 @@ class ArgParser:
             sys.exit("9")
 
 
-class GameBoard:
+class GameChecker:
+    def check_for_wins(self) -> None:
+        """Check if the game has been won"""
+        if self.total_moves >= 2 * self.winning_moves - 1:
+            # Only start checking for wins if the first player has
+            # managed to put the lowest possible winning moves
+            self.check_vertical_line()
+
+    def check_line_for_win(self, line: Optional[int]) -> None:
+        """Check if the current player has won based on the given line"""
+        for position in reversed(range(self.winning_moves)):
+            # Loop backwards through line positions starting
+            # from the checker that was added in this turn.
+            try:
+                if line[position] != self.current_player:
+                    # There's a checker belonging to another player. You
+                    # won't get a winning number of checkers in a row
+                    return
+            except IndexError:
+                # Ran out of available positions on the board to check.
+                return
+
+            # The line has been checked successfully without:
+            # 1. running out of positions on the board
+            # 2. without having any blank or other player's checkers in a row
+            # The current player has won the game.
+            print("WIN!")
+            sys.exit(f"{self.current_player}")
+
+    def get_vertical_line(self):
+        """
+        Get a line of checkers in a column including
+        the one that was added in this turn
+        """
+        return self.board[self.current_column][: self.current_row + 1]
+
+    def check_vertical_line(self):
+        """
+        Check if the player has one by looking at
+        the column that has a new checker
+        """
+        line = self.get_vertical_line()
+        self.check_line_for_win(line)
+
+
+class GameBoard(GameChecker):
     def __init__(
         self, width: int, height: int, winning_moves: int, file_object
     ) -> None:
         self.file_object = file_object
         self.winning_moves = winning_moves
-        self.player = cycle(range(1, 3))  #  The turn of the player (1 or 2)
-        self.total_moves = 0
+        self.player = cycle(range(1, 3))  #  Alternate player turn (1 or 2)
 
-        # Internal representation of the game board.
-        # It is actually stored transposed to make it easier
-        # to use and access elements elsewhere in the code.
         self.board = [[None for row in range(height)] for col in range(width)]
-        self.height = height
 
-    def check_for_wins(self):
-        pass
+        self.current_player = None
+        self.current_column = None
+        self.current_row = None
+        self.total_moves = 0
 
     def make_move(self, move: int):
         column = move - 1
         try:
-            new_position = next(
-                x for x, psn in enumerate(self.board[column]) if psn is None
-            )
+            # Find the first blank position along the column for next move
+            row = next(x for x, psn in enumerate(self.board[column]) if psn is None)
         except StopIteration:
             # Illegal row. The column is already full.
             sys.exit("5")
@@ -73,8 +114,11 @@ class GameBoard:
             # Illegal column. Column chosen outside the board
             sys.exit("6")
         else:
+            self.current_column = column
+            self.current_row = row
             self.total_moves += 1
-            self.board[column][new_position] = next(self.player)
+            self.current_player = next(self.player)
+            self.board[column][row] = self.current_player
 
     def get_player_moves(self) -> List[int]:
         """Return a list of tuples containing (Player, Move)"""
@@ -101,7 +145,7 @@ class GameBoard:
 
     @staticmethod
     def _print_board(board):
-        for row in board[::-1]:
+        for row in board:
             print(row)
         print()
 
@@ -123,9 +167,8 @@ def main() -> None:
         board = GameBoard(width, height, winning_moves, file_object)
         for move in board.get_player_moves():
             board.make_move(move)
+            board.print_internal_board()
             board.check_for_wins()
-
-        board.print_real_board()
 
 
 if __name__ == "__main__":
