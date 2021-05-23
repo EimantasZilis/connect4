@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 
-def sliding_window(iterable, size) -> Optional[int]:
+def sliding_window(iterable: Optional[int], size: int) -> Optional[int]:
     """
     Applies a sliding window of a given size to an iterable
     and returns (every) smaller list that can fit into an iterable"""
@@ -246,7 +246,7 @@ class GameBoard(GameChecker):
             sys.exit("0")
         else:
             # Game winner
-            sys.exit(self.winner)
+            sys.exit(str(self.winner))
 
 
 def parse_file_header(header: List[str], setup: List[str]) -> Tuple[int]:
@@ -265,11 +265,15 @@ def parse_file_header(header: List[str], setup: List[str]) -> Tuple[int]:
             height = int(setup_item)
         elif header_item == "Z":
             winning_moves = int(setup_item)
+    
+    game_specs = (width, height, winning_moves)
+    if any(spec is None for spec in game_specs):
+        raise ValueError("Width, height or winning moves not specified")
+    
+    if any(map(lambda x: x <= 0, game_specs)):
+        raise ValueError("invalid values in input file")
 
-    if all(spec is None for spec in (width, height, winning_moves)):
-        raise ValueError("File does not meet expected format")
-
-    return width, height, winning_moves
+    return game_specs
 
 
 def play_game(file: Path) -> None:
@@ -277,7 +281,7 @@ def play_game(file: Path) -> None:
     Start the game by reading the file and making the moves.
     It will check if the game has been won.
     """
-    with file.open(encoding="ascii") as file_object:
+    with file.open(mode="r", encoding="ascii") as file_object:
         try:
             header = next(file_object).rstrip("\n").split(" ")
             setup = next(file_object).rstrip("\n").split(" ")

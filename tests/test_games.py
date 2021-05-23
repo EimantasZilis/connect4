@@ -1,29 +1,42 @@
+import os
 import pytest
+from collections import defaultdict
 from unittest.mock import patch
 from pathlib import Path
 
 from pathlib import Path
 from typing import List
-from constants import status_codes
 from connectz import main, ArgParser
 
 BASE_TEST_DIR = Path(__file__).resolve().parent / "test_statuses"
 
-
-def get_test_files(status: str) -> List[Path]:
-    return [
-        file
-        for file in (BASE_TEST_DIR / status).iterdir()
+def get_files():
+    test_runs = [
+        (folder.name, file)
+        for folder in BASE_TEST_DIR.iterdir()
+        for file in folder.iterdir()
         if file.is_file()
     ]
-
+    return test_runs
 
 class TestStatuses:
-    @patch("connectz.ArgParser")
-    @pytest.mark.parametrize("status", list(map(str, range(1, 10))))
-    def test_files(self, mock_arg_parser, status):
-        for file in get_test_files(status):
-            mock_arg_parser.get_file.return_value = file
-            with pytest.raises(SystemExit) as sys_exit:
-                main()
-                assert sys_exit.exception.code == status
+    
+    @pytest.mark.parametrize("status,file", get_files())
+    @patch.object(ArgParser, "__init__", return_value=None)
+    @patch.object(ArgParser, "get_file")
+    def test_file(self, mock_get_file, mock_init, status, file):
+        mock_get_file.return_value = file
+        with pytest.raises(SystemExit) as sys_exit:
+            main()
+        assert sys_exit.value.code == status
+
+    @patch.object(ArgParser, "__init__", return_value=None)
+    @patch.object(ArgParser, "get_file")
+    def test_non_existent_file(self, mock_get_file, mock_init):
+        missing_file = BASE_TEST_DIR / "I_don't_exist.txt"
+        assert not missing_file.exists()
+
+        mock_get_file.return_value = missing_file
+        with pytest.raises(SystemExit) as sys_exit:
+            main()
+        assert sys_exit.value.code == "9"
