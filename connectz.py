@@ -254,6 +254,10 @@ def parse_file_header(header: List[str], setup: List[str]) -> Tuple[int]:
     Given header and setup lists, parse the information
     into board width, height and winning moves.
     """
+    width = None
+    height = None
+    winning_moves = None    
+
     for header_item, setup_item in zip(header, setup):
         if header_item == "X":
             width = int(setup_item)
@@ -261,6 +265,10 @@ def parse_file_header(header: List[str], setup: List[str]) -> Tuple[int]:
             height = int(setup_item)
         elif header_item == "Z":
             winning_moves = int(setup_item)
+
+    if all(spec is None for spec in (width, height, winning_moves)):
+        raise ValueError("File does not meet expected format")
+
     return width, height, winning_moves
 
 
@@ -278,7 +286,13 @@ def play_game(file: Path) -> None:
             sys.exit("8")
 
         # Make sure you get the right details from the headers
-        width, height, winning_moves, = parse_file_header(header, setup)
+        try:
+            width, height, winning_moves, = parse_file_header(header, setup)
+        except ValueError:
+            # File header must have unexpected values
+            # such as non-integer board layout
+            sys.exit("8")
+        
         if width < winning_moves and height < winning_moves:
             # Illegal game. Game can never be won, because
             # there are not enough rows/columns.
