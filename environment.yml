@@ -10,3 +10,4 @@ dependencies:
     - isort                 # MIT
     - autoflake             # MIT
     - black                 # MIT
+    - pytest                # MIT
