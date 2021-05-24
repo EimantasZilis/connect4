@@ -53,9 +53,9 @@ class ArgParser:
 class GameChecker:
     """
     A class for checking if the game has been won.
-    It looks at all lines around a recent checker and
+    It looks at all lines around a recent piece and
     checks if there are any lines that have a winning
-    number of checkers belonging to the same player.
+    number of pieces belonging to the same player.
     """
 
     def check_for_wins(self) -> None:
@@ -79,15 +79,15 @@ class GameChecker:
 
         for position in reversed(range(self.winning_moves)):
             # Loop backwards through line positions starting
-            # from the checker that was added in this turn.
+            # from the piece that was added in this turn.
             if line[position] != self.current_player:
-                # There's a checker belonging to another player. You
-                # won't get a winning number of checkers in a row
+                # There's a piece belonging to another player. You
+                # won't get a winning number of pieces in a row
                 return
 
         # The line has been checked successfully without:
         # 1. running out of positions on the board
-        # 2. without having any blank or other player's checkers in a row
+        # 2. without having any blank or other player's pieces in a row
         # The current player has won the game.
         self.winner = str(self.current_player)
         raise GameWinner(f"{self.current_player}")
@@ -95,9 +95,9 @@ class GameChecker:
     def check_vertical_line(self) -> None:
         """
         Check if the player has one by looking at
-        the column that has a new checker
+        the column that has a new piece
         """
-        #  Get a line of checkers in a column with the one recently added
+        #  Get a line of pieces in a column with the one recently added
         line = self.board[self.current_column][: self.current_row + 1]
         self.check_line_for_win(line)
 
@@ -129,7 +129,7 @@ class GameChecker:
     def check_right_diagonal_line(self) -> None:
         """
         Check if the player has won by looking at the right
-        diagonal pointing downwards starting with a new checker
+        diagonal pointing downwards starting with a new piece
         """
         line = self.get_diagonal_line(orientation="right")
         self.check_line_for_win(line)
@@ -137,7 +137,7 @@ class GameChecker:
     def check_left_diagonal_line(self) -> None:
         """
         Check if the player has won by looking at the left
-        diagonal pointing downwards starting with a new checker
+        diagonal pointing downwards starting with a new piece
         """
         line = self.get_diagonal_line(orientation="left")
         self.check_line_for_win(line)
@@ -145,7 +145,7 @@ class GameChecker:
     def check_horizontal_lines(self) -> None:
         """
         Check if the player has won by looking at the horizonal
-        line that the new checker has been put in"""
+        line that the new piece has been put in"""
 
         # If the board width is bigger than the number of winning
         # moves required, there is more than one way to build a line.
