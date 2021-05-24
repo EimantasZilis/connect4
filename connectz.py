@@ -289,8 +289,8 @@ def play_game(file: Path) -> None:
             # File contents do not meet expected format
             sys.exit("8")
 
-        # Make sure you get the right details from the headers
         try:
+            # Make sure you get the right details from the headers
             width, height, winning_moves, = parse_file_header(header, setup)
         except ValueError:
             # File header must have unexpected values
