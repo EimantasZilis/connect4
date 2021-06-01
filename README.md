@@ -11,6 +11,13 @@ This will create a `.git/hooks` directory if none exist and and will symlink the
 
 The current `pre-commit` hook supports file formatting using `black` and `isort`.
 
-# Other notes
-The game has been impletented using Python 3.6.
+# To do
+ - Update readme
+ - Fix environment file and make sure environment gets created correctly
+ - rename connectz.py to main.py
+ - move stuff to utils/helper files
+ - write unit tests
+ - remove sys.exits
+ - raise exceptions?
+
 
