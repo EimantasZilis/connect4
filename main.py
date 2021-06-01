@@ -3,7 +3,7 @@ import sys
 from itertools import cycle, tee
 from pathlib import Path
 from typing import List, Optional, Tuple
-from helpers import ArgParser, sliding_window
+from helpers import ArgParser, parse_file_header, sliding_window
 
 class GameWinner(Exception):
     """An exception to indicate that the game has been won"""
@@ -207,53 +207,14 @@ class GameBoard(GameChecker):
             sys.exit(str(self.winner))
 
 
-def parse_file_header(header: List[str], setup: List[str]) -> Tuple[int]:
-    """
-    Given header and setup lists, parse the information
-    into board width, height and winning moves.
-    """
-    width = None
-    height = None
-    winning_moves = None    
-
-    for header_item, setup_item in zip(header, setup):
-        if header_item == "X":
-            width = int(setup_item)
-        elif header_item == "Y":
-            height = int(setup_item)
-        elif header_item == "Z":
-            winning_moves = int(setup_item)
-    
-    game_specs = (width, height, winning_moves)
-    if any(spec is None for spec in game_specs):
-        raise ValueError("Width, height or winning moves not specified")
-    
-    if any(map(lambda x: x <= 0, game_specs)):
-        raise ValueError("invalid values in input file")
-
-    return game_specs
-
-
 def play_game(file: Path) -> None:
     """
     Start the game by reading the file and making the moves.
     It will check if the game has been won.
     """
     with file.open(mode="r", encoding="ascii") as file_object:
-        try:
-            header = next(file_object).rstrip("\n").split(" ")
-            setup = next(file_object).rstrip("\n").split(" ")
-        except StopIteration:
-            # File contents do not meet expected format
-            sys.exit("8")
-
-        try:
-            # Make sure you get the right details from the headers
-            width, height, winning_moves, = parse_file_header(header, setup)
-        except ValueError:
-            # File header must have unexpected values
-            # such as non-integer board layout
-            sys.exit("8")
+        haeder = next(file_object).rstrip("\n").split(" ")
+        width, height, winning_moves, = parse_file_header(header)
         
         if width < winning_moves and height < winning_moves:
             # Illegal game. Game can never be won, because
