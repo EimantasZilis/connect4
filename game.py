@@ -214,7 +214,7 @@ def play_game(file: Path) -> None:
     Start the game by reading the file and making the moves.
     It will check if the game has been won.
     """
-    with file.open(mode="r", encoding="ascii") as file_object:
+    with file.open(mode="r") as file_object:
         header = next(file_object).rstrip("\n")
         (
             width,
