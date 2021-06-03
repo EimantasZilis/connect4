@@ -1,4 +1,3 @@
-import sys
 from itertools import cycle
 from pathlib import Path
 from typing import List, Optional
@@ -6,8 +5,16 @@ from typing import List, Optional
 from helpers import parse_file_header, sliding_window, validate_board_setup
 
 
-class GameWinner(Exception):
-    """An exception to indicate that the game has been won"""
+class GameOver(Exception):
+    """
+    An exception to indicate that the game has been completed.
+    This can only be achieved if the game has been won by one
+    of the players or if there is a draw.
+    """
+
+
+class GameError(Exception):
+    """An exception to indicate that there was an error in the game"""
 
 
 class GameChecker:
@@ -28,7 +35,7 @@ class GameChecker:
                 self.check_left_diagonal_line()
                 self.check_right_diagonal_line()
                 self.check_horizontal_lines()
-            except GameWinner as e:
+            except GameOver as e:
                 self.winner = e
 
     def check_line_for_win(self, line: Optional[int]) -> None:
@@ -49,8 +56,8 @@ class GameChecker:
         # 1. running out of positions on the board
         # 2. without having any blank or other player's pieces in a row
         # The current player has won the game.
-        self.winner = str(self.current_player)
-        raise GameWinner(f"{self.current_player}")
+        self.winner = self.current_player
+        raise GameOver(self.winner)
 
     def check_vertical_line(self) -> None:
         """
@@ -166,10 +173,10 @@ class GameBoard(GameChecker):
             row = next(x for x, psn in enumerate(self.board[column]) if psn is None)
         except StopIteration:
             # Illegal row. The column is already full.
-            sys.exit("5")
+            raise GameError(5)
         except IndexError:
             # Illegal column. Column chosen outside the board
-            sys.exit("6")
+            raise GameError(6)
         else:
             self.current_column = column
             self.current_row = row
@@ -185,11 +192,11 @@ class GameBoard(GameChecker):
                 next_move = int(next_move)
             except ValueError:
                 # Moves should only be denoted by a digit
-                sys.exit("8")
+                raise GameError(8)
 
             if next_move <= 0:
                 # It doesn't make sense to have a column <= 0
-                sys.exit("8")
+                raise GameError(8)
             else:
                 yield next_move
 
@@ -200,13 +207,13 @@ class GameBoard(GameChecker):
         """
         if self.winner is None and self.total_moves < self.width * self.height:
             # Game is not finished, but no further moves were made
-            sys.exit("3")
+            raise GameError(3)
         if self.winner is None:
             # Draw
-            sys.exit("0")
+            raise GameOver(0)
         else:
             # Game winner
-            sys.exit(str(self.winner))
+            raise GameOver(self.winner)
 
 
 def play_game(file: Path) -> None:
@@ -230,6 +237,14 @@ def play_game(file: Path) -> None:
                 board.check_for_wins()
             else:
                 # Trying to make an illegal move
-                sys.exit("4")
+                raise GameError(4)
 
         board.finish_game()
+
+
+def start_game(file) -> None:
+    try:
+        play_game(file)
+    except (OSError, IOError, UnicodeError):
+        # There are some issues with opening or reading the file
+        raise GameError(9)
