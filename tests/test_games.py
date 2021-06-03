@@ -1,14 +1,12 @@
-import os
-import pytest
-from collections import defaultdict
+from pathlib import Path
 from unittest.mock import patch
-from pathlib import Path
 
-from pathlib import Path
-from typing import List
-from connectz import main, ArgParser
+import pytest
+
+from main import ArgParser, main
 
 BASE_TEST_DIR = Path(__file__).resolve().parent / "test_statuses"
+
 
 def get_files():
     test_runs = [
@@ -19,8 +17,8 @@ def get_files():
     ]
     return test_runs
 
+
 class TestStatuses:
-    
     @pytest.mark.parametrize("status,file", get_files())
     @patch.object(ArgParser, "__init__", return_value=None)
     @patch.object(ArgParser, "get_file")

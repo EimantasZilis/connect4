@@ -23,13 +23,10 @@ conda env create -f environment.yml
 
 # To do
  - Update readme
- - Fix environment file and make sure environment gets created correctly
- - move stuff to utils/helper files
  - write unit tests
  - remove sys.exits
  - raise exceptions?
  - Fix parser to only accept one argument
- - Remove X/Y/Z headers
  - Remove ASCII dependency
 
 
