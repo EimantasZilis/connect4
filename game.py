@@ -1,20 +1,8 @@
 from itertools import cycle
-from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, TextIO, Tuple
 
-from helpers import parse_file_header, sliding_window, validate_board_setup
-
-
-class GameOver(Exception):
-    """
-    An exception to indicate that the game has been completed.
-    This can only be achieved if the game has been won by one
-    of the players or if there is a draw.
-    """
-
-
-class GameError(Exception):
-    """An exception to indicate that there was an error in the game"""
+from exceptions import GameError, GameOver
+from helpers import sliding_window
 
 
 class GameChecker:
@@ -163,6 +151,17 @@ class GameBoard(GameChecker):
         self.width = width
         self.height = height
 
+    def start_game(self) -> None:
+        for move in self.get_moves():
+            if self.winner is None:
+                self.make_move(move)
+                self.check_for_wins()
+            else:
+                # Trying to make an illegal move
+                raise GameError(4)
+
+        self.finish_game()
+
     def make_move(self, move: int) -> None:
         """
         Make a move and mark it on the board.
@@ -184,7 +183,7 @@ class GameBoard(GameChecker):
             self.current_player = next(self.player)
             self.board[column][row] = self.current_player
 
-    def get_player_moves(self) -> List[int]:
+    def get_moves(self) -> List[int]:
         """A generator which returns next player moves"""
         for next_move in self.file_object:
             next_move = next_move.rstrip("\n")
@@ -216,35 +215,44 @@ class GameBoard(GameChecker):
             raise GameOver(self.winner)
 
 
-def play_game(file: Path) -> None:
-    """
-    Start the game by reading the file and making the moves.
-    It will check if the game has been won.
-    """
-    with file.open(mode="r") as file_object:
-        header = next(file_object).rstrip("\n")
-        (
-            width,
-            height,
-            winning_moves,
-        ) = parse_file_header(header)
-        validate_board_setup(width, height, winning_moves)
+class Game:
+    def __init__(self, file_pointer: TextIO) -> None:
+        self.file_pointer = file_pointer
 
-        board = GameBoard(width, height, winning_moves, file_object)
-        for move in board.get_player_moves():
-            if board.winner is None:
-                board.make_move(move)
-                board.check_for_wins()
-            else:
-                # Trying to make an illegal move
-                raise GameError(4)
+    def play(self) -> None:
+        header = self.get_file_header()
+        width, height, winning_moves = self.parse_header(header)
 
-        board.finish_game()
+        self.validate_board_setup(width, height, winning_moves)
+        board = GameBoard(width, height, winning_moves, self.file_pointer)
+        board.start_game()
 
+    def get_file_header(self) -> str:
+        try:
+            return next(self.file_pointer).rstrip("\n")
+        except (OSError, IOError, UnicodeError):
+            # There are some issues with opening or reading the file
+            raise GameError(9)
 
-def start_game(file) -> None:
-    try:
-        play_game(file)
-    except (OSError, IOError, UnicodeError):
-        # There are some issues with opening or reading the file
-        raise GameError(9)
+    def parse_header(self, header: str) -> Tuple[int]:
+        """
+        Given a file header, parse the information
+        into board width, height and winning moves.
+        """
+        try:
+            width, height, winning_moves = map(int, header.split(" "))
+            return width, height, winning_moves
+        except ValueError:
+            # File contents do not meet expected format
+            raise GameError(8)
+
+    def validate_board_setup(self, width: int, height: int, winning_moves: int) -> None:
+        game_specs = (width, height, winning_moves)
+        if any(map(lambda x: x <= 0, game_specs)):
+            # invalid values in input file
+            raise GameError(8)
+
+        if width < winning_moves and height < winning_moves:
+            # Illegal game. Game can never be won, because
+            # there are not enough rows/columns.
+            raise GameError(7)
