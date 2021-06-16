@@ -1,6 +1,7 @@
 from itertools import cycle
 from typing import List, Optional, TextIO, Tuple
 
+from constants import status_codes
 from exceptions import GameError, GameOver
 from helpers import sliding_window
 
@@ -218,8 +219,26 @@ class GameBoard(GameChecker):
 class Game:
     def __init__(self, file_pointer: TextIO) -> None:
         self.file_pointer = file_pointer
+        self.status = None
+
+    def show_summary(self) -> None:
+        if self.status == 0:
+            print("Draw")
+        elif self.status in (1, 2):
+            print(f"Player {self.status} won")
+        elif self.status in map(str, range(1, 10)):
+            print(f"Game Error: {status_codes[self.status]}")
+        else:
+            print(f"Unknown Error - code: {self.status}")
 
     def play(self) -> None:
+        try:
+            self._play()
+        except (GameOver, GameError) as game_status:
+            # Change game_status exception object into a string
+            self.status = str(game_status)
+
+    def _play(self) -> None:
         header = self.get_file_header()
         width, height, winning_moves = self.parse_header(header)
 
