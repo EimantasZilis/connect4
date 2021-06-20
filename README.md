@@ -24,8 +24,5 @@ conda env create -f environment.yml
 # To do
  - Update readme
  - write unit tests
- - remove sys.exits
- - raise exceptions?
- - Fix parser to only accept one argument
 
 

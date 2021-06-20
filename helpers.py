@@ -3,6 +3,8 @@ from itertools import tee
 from pathlib import Path
 from typing import Optional
 
+from config import GAME_STATUSES
+
 
 class ArgParser:
     """Get input argument and validate that it exists"""
@@ -28,3 +30,14 @@ def sliding_window(iterable: Optional[int], size: int) -> Optional[int]:
         for each in iters[i:]:
             next(each)
     return zip(*iters)
+
+
+def show_summary(status: int) -> None:
+    if status == 0:
+        print("Draw")
+    elif status in (1, 2):
+        print(f"Player {status} won")
+    elif status in map(str, range(1, 10)):
+        print(f"Game Error: {GAME_STATUSES[status]}")
+    else:
+        print(f"Unknown Error - code: {status}")
