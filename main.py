@@ -4,7 +4,7 @@ from helpers import ArgParser
 
 def main() -> None:
     arg_parser = ArgParser()
-    file = arg_parser.get_file()
+    file = arg_parser.get_path()
 
     with file.open(mode="r") as fp:
         game = Game(fp)

@@ -1,9 +1,20 @@
 from itertools import cycle
 from typing import List, Optional, TextIO, Tuple
 
-from constants import status_codes
-from exceptions import GameError, GameOver
+from config import GAME_STATUSES
 from helpers import sliding_window
+
+
+class GameOver(Exception):
+    """
+    An exception to indicate that the game has been completed.
+    This can only be achieved if the game has been won by one
+    of the players or if there is a draw.
+    """
+
+
+class GameError(Exception):
+    """An exception to indicate that there was an error in the game"""
 
 
 class GameChecker:
@@ -227,7 +238,7 @@ class Game:
         elif self.status in (1, 2):
             print(f"Player {self.status} won")
         elif self.status in map(str, range(1, 10)):
-            print(f"Game Error: {status_codes[self.status]}")
+            print(f"Game Error: {GAME_STATUSES[self.status]}")
         else:
             print(f"Unknown Error - code: {self.status}")
 

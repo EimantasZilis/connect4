@@ -1,5 +1,4 @@
 import argparse
-import sys
 from itertools import tee
 from pathlib import Path
 from typing import Optional
@@ -9,30 +8,15 @@ class ArgParser:
     """Get input argument and validate that it exists"""
 
     def __init__(self) -> None:
-        parser = argparse.ArgumentParser(description="Connect Z")
+        parser = argparse.ArgumentParser(description="Connect4")
         parser.add_argument(
-            "inputfilename", type=str, nargs="*", help="Enter file name"
+            "filename", type=str, help="Filename describing the game play"
         )
         self.args = parser.parse_args()
 
-    def get_file(self) -> Path:
-        """
-        Get file from inputfilename argument.
-        It makes sure that the file also exists.
-        """
-        input_file = self._validate_inputfilename()
-        return Path(input_file)
-
-    def _validate_inputfilename(self) -> None:
-        """
-        Validate that one inputfilename argument is specified.
-        It stops the program otherwise.
-        """
-        input_file, *bad_params = self.args.inputfilename
-        if input_file is None or bad_params:
-            sys.exit("connectz.py: Provide one input file")
-        else:
-            return input_file
+    def get_path(self) -> Path:
+        """Get path from path argument"""
+        return Path(self.args.filename)
 
 
 def sliding_window(iterable: Optional[int], size: int) -> Optional[int]:
