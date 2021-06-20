@@ -1,7 +1,7 @@
 import argparse
 from itertools import tee
 from pathlib import Path
-from typing import Optional
+from typing import Generator, Optional
 
 from config import GAME_STATUSES
 
@@ -21,7 +21,7 @@ class ArgParser:
         return Path(self.args.filename)
 
 
-def sliding_window(iterable: Optional[int], size: int) -> Optional[int]:
+def sliding_window(iterable: Optional[int], size: int) -> Generator[int, None, None]:
     """
     Applies a sliding window of a given size to an iterable
     and returns (every) smaller list that can fit into an iterable"""
