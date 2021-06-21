@@ -31,16 +31,19 @@ class GameChecker:
             # managed to put the lowest possible winning moves
             self._check_lines_for_wins()
 
-    def check_line_for_win(self, line: Optional[int]) -> None:
+    def check_line_for_win(self, line: List[int]) -> None:
         """Check if the current player has won based on a given line"""
         if len(line) < self.winning_moves:
             # The line isn't long enough to be able to win
             return
 
-        for position in reversed(range(self.winning_moves)):
+        for offset in range(1, self.winning_moves + 1):
             # Loop backwards through line positions starting
             # from the piece that was added in this turn.
-            if line[position] != self.current_player:
+            # Only check the winning number of moves, because
+            # others have already been checked previously
+
+            if line[-offset] != self.current_player:
                 # There's a piece belonging to another player. You
                 # won't get a winning number of pieces in a row
                 return
