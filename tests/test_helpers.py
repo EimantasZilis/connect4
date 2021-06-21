@@ -39,6 +39,6 @@ class TestArgParser:
     ],
 )
 def test_sliding_window(
-    iterable: List[int], window_size: int, expected_windows: Tuple[List[int]]
+    iterable: List[int], window_size: int, expected_windows: List[Tuple[int]]
 ):
     assert list(sliding_window(iterable, window_size)) == expected_windows

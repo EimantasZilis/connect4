@@ -29,13 +29,7 @@ class GameChecker:
         if self.total_moves >= 2 * self.winning_moves - 1:
             # Only start checking for wins if the first player has
             # managed to put the lowest possible winning moves
-            try:
-                self.check_vertical_line()
-                self.check_left_diagonal_line()
-                self.check_right_diagonal_line()
-                self.check_horizontal_lines()
-            except GameOver as e:
-                self.winner = e
+            self._check_lines_for_wins()
 
     def check_line_for_win(self, line: Optional[int]) -> None:
         """Check if the current player has won based on a given line"""
@@ -135,6 +129,16 @@ class GameChecker:
         # by applying a slidng window to the row
         for line in sliding_window(row, self.winning_moves):
             self.check_line_for_win(line)
+
+    def _check_lines_for_wins(self) -> None:
+        """Check if the game has been won"""
+        try:
+            self.check_vertical_line()
+            self.check_left_diagonal_line()
+            self.check_right_diagonal_line()
+            self.check_horizontal_lines()
+        except GameOver as e:
+            self.winner = e
 
 
 class GameBoard(GameChecker):

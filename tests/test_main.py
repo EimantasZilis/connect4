@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -19,7 +19,7 @@ def get_files():
 
 
 @pytest.mark.parametrize("status,file", get_files())
-def test_start_game(status, file) -> None:
+def test_start_game(status: str, file: Path) -> None:
     assert start_game(file) == status
 
 
@@ -34,7 +34,12 @@ def test_start_game_file_doesnt_exist() -> None:
 @patch("main.show_summary")
 @patch.object(ArgParser, "get_path")
 @patch.object(ArgParser, "__init__", return_value=None)
-def test_main(mock_init, mock_get_path, mock_show_summary, mock_start_game) -> None:
+def test_main(
+    mock_init: MagicMock,
+    mock_get_path: MagicMock,
+    mock_show_summary: MagicMock,
+    mock_start_game: MagicMock,
+) -> None:
     status = "3"
     filename = Path("some_path")
     mock_get_path.return_value = filename
