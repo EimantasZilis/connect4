@@ -141,7 +141,7 @@ class GameChecker:
             self.check_right_diagonal_line()
             self.check_horizontal_lines()
         except GameOver as e:
-            self.winner = e
+            self.winner = int(str(e))
 
 
 class GameBoard(GameChecker):
