@@ -11,3 +11,4 @@ dependencies:
     - autoflake==1.4        # MIT
     - black==21.5b2         # MIT
     - pytest==6.2.4         # MIT
+    - pytest-cov==2.12.1    # MIT
