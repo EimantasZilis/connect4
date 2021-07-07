@@ -1,9 +1,9 @@
 from typing import List
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, call, patch
 
 import pytest
 
-from game import GameChecker, GameOver
+from game import GameBoard, GameChecker, GameError, GameOver
 
 BASE_PATH = "game.GameChecker"
 
@@ -282,3 +282,129 @@ class TestGameChecker:
         assert game_checker.winner == None
         game_checker._check_lines_for_wins()
         assert game_checker.winner == None
+
+
+class TestGameBoard:
+    @pytest.fixture
+    def game_board(self) -> GameBoard:
+        width = 3
+        height = 4
+        winning_moves = 3
+        file_object = Mock()
+        return GameBoard(width, height, winning_moves, file_object)
+
+    def test_init(self):
+        width = 3
+        height = 4
+        winning_moves = 2
+        file_object = Mock()
+
+        board = GameBoard(width, height, winning_moves, file_object)
+
+        assert board.width == width
+        assert board.height == height
+        assert board.max_diagonal_length == 3
+        assert board.file_object == file_object
+
+        assert board.winner == None
+        assert board.current_player == None
+        assert board.current_column == None
+        assert board.current_row == None
+        assert board.total_moves == 0
+
+        assert board.board == [
+            [None, None, None, None],
+            [None, None, None, None],
+            [None, None, None, None],
+        ]
+
+    @patch.object(GameBoard, "make_move")
+    @patch.object(GameBoard, "get_moves")
+    @patch.object(GameBoard, "finish_game")
+    def test_start_game(
+        self,
+        mock_finish_game: MagicMock,
+        mock_get_moves: MagicMock,
+        mock_make_move: MagicMock,
+        game_board: GameBoard,
+    ) -> None:
+        moves = [1, 2, 3]
+        mock_get_moves.return_value = moves
+        game_board.start_game()
+
+        mock_finish_game.assert_called_once()
+        assert mock_make_move.call_args_list == [call(move) for move in moves]
+
+    def test_make_move_game_error(self, game_board: GameBoard) -> None:
+        game_board.winner = 1
+        with pytest.raises(GameError) as exc:
+            game_board.make_move(1)
+
+        assert int(str(exc.value)) == 4
+
+    @patch.object(GameBoard, "add_piece")
+    @patch.object(GameBoard, "check_for_wins")
+    def test_make_move_no_winner(
+        self,
+        mock_check_for_wins: MagicMock,
+        mock_add_piece: MagicMock,
+        game_board: GameBoard,
+    ) -> None:
+        move = 1
+        game_board.winner = None
+        game_board.make_move(1)
+
+        mock_add_piece.assert_called_once_with(move)
+        mock_check_for_wins.assert_called_once()
+
+    def test_add_piece_illegal_row(self, game_board: GameBoard) -> None:
+        game_board.board = [[0, 1, 1]]
+        with pytest.raises(GameError) as exc:
+            game_board.add_piece(1)
+
+        assert int(str(exc.value)) == 5
+
+    def test_add_piece_illegal_column(self, game_board: GameBoard) -> None:
+        game_board.board = [[0, 1, 1]]
+        with pytest.raises(GameError) as exc:
+            game_board.add_piece(2)
+
+        assert int(str(exc.value)) == 6
+
+    def test_add_piece(self, game_board: GameBoard) -> None:
+        game_board.board = [[1, 2, None]]
+
+        assert game_board.current_column == None
+        assert game_board.current_row == None
+        assert game_board.total_moves == 0
+        assert game_board.current_player == None
+
+        game_board.add_piece(1)
+
+        assert game_board.current_column == 0
+        assert game_board.current_row == 2
+        assert game_board.total_moves == 1
+        assert game_board.board[0][2] == 1
+
+    def test_get_moves(self, game_board: GameBoard) -> None:
+        vals = range(1, 6)
+        game_board.file_object = [f"{x}\n" for x in vals]
+        assert list(game_board.get_moves()) == list(vals)
+
+    def test_get_moves_not_digit(self, game_board: GameBoard) -> None:
+        game_board.file_object = [f"{x}\n" for x in (1, 2, 3, "a")]
+        with pytest.raises(GameError) as exc:
+            list(game_board.get_moves())
+        assert int(str(exc.value)) == 8
+
+    def test_get_moves_0_value(self, game_board: GameBoard) -> None:
+        game_board.file_object = [f"{x}\n" for x in (1, 2, 0, 3)]
+        with pytest.raises(GameError) as exc:
+            list(game_board.get_moves())
+        assert int(str(exc.value)) == 8
+
+    def test_get_moves_negative_value(self, game_board: GameBoard) -> None:
+        game_board.file_object = [f"{x}\n" for x in (1, 2, 3, -1)]
+        with pytest.raises(GameError) as exc:
+            list(game_board.get_moves())
+        assert int(str(exc.value)) == 8

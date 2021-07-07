@@ -170,17 +170,26 @@ class GameBoard(GameChecker):
         self.height = height
 
     def start_game(self) -> None:
+        """
+        Start the game and make moves until the game is
+        finished or until the there is an error.
+        """
         for move in self.get_moves():
-            if self.winner is None:
-                self.make_move(move)
-                self.check_for_wins()
-            else:
-                # Trying to make an illegal move
-                raise GameError(4)
-
+            self.make_move(move)
         self.finish_game()
 
     def make_move(self, move: int) -> None:
+        """
+        Make a move by adding a piece and checking for wins
+        """
+        if self.winner is None:
+            self.add_piece(move)
+            self.check_for_wins()
+        else:
+            # Trying to make an illegal move
+            raise GameError(4)
+
+    def add_piece(self, move: int) -> None:
         """
         Make a move and mark it on the board.
         """
