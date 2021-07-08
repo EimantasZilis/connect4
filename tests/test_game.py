@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, Mock, call, patch
 
 import pytest
 
-from game import GameBoard, GameChecker, GameError, GameOver
+from game import Game, GameBoard, GameChecker, GameError, GameOver
 
 BASE_PATH = "game.GameChecker"
 
@@ -408,3 +408,71 @@ class TestGameBoard:
         with pytest.raises(GameError) as exc:
             list(game_board.get_moves())
         assert int(str(exc.value)) == 8
+
+    def test_finish_game_not_finished(self, game_board: GameBoard) -> None:
+        game_board.winner = None
+        game_board.total_moves = 7
+        game_board.width = 4
+        game_board.height = 2
+
+        with pytest.raises(GameError) as exc:
+            game_board.finish_game()
+
+        assert int(str(exc.value)) == 3
+
+    def test_finish_game_draw(self, game_board: GameBoard) -> None:
+        game_board.winner = None
+        game_board.total_moves = 8
+        game_board.width = 4
+        game_board.height = 2
+
+        with pytest.raises(GameOver) as exc:
+            game_board.finish_game()
+
+        assert int(str(exc.value)) == 0
+
+    def test_finish_game_won(self, game_board: GameBoard) -> None:
+        winner = 1
+        game_board.winner = winner
+        game_board.total_moves = 8
+        game_board.width = 4
+        game_board.height = 2
+
+        with pytest.raises(GameOver) as exc:
+            game_board.finish_game()
+
+        assert int(str(exc.value)) == winner
+
+
+class TestGame:
+    @pytest.fixture
+    def file_object(self) -> MagicMock:
+        return Mock()
+
+    @pytest.fixture
+    def game(self, file_object: MagicMock) -> None:
+        return Game(file_object)
+
+    def test_init(self) -> None:
+        file_pointer = Mock()
+        game = Game(file_pointer)
+        assert game.file_pointer == file_pointer
+
+    @patch.object(Game, "initialise")
+    def test_play_game_not_finished(
+        self, mock_initialise: MagicMock, game: Game
+    ) -> None:
+        assert game.play() == None
+        mock_initialise.assert_called_once()
+
+    @pytest.mark.parametrize("exception", (GameError, GameError))
+    @patch.object(Game, "initialise")
+    def test_play_game_not_finished(
+        self, mock_initialise: MagicMock, exception, game: Game
+    ) -> None:
+        status = 1
+        mock_initialise.side_effect = exception(status)
+        game_status = game.play()
+
+        mock_initialise.assert_called_once()
+        assert game_status == str(status)

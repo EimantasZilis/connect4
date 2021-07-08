@@ -234,7 +234,7 @@ class GameBoard(GameChecker):
         if self.winner is None and self.total_moves < self.width * self.height:
             # Game is not finished, but no further moves were made
             raise GameError(3)
-        if self.winner is None:
+        elif self.winner is None:
             # Draw
             raise GameOver(0)
         else:
@@ -248,12 +248,12 @@ class Game:
 
     def play(self) -> None:
         try:
-            self._play()
+            self.initialise()
         except (GameOver, GameError) as game_status:
             # Change game_status exception object into a string
             return str(game_status)
 
-    def _play(self) -> None:
+    def initialise(self) -> None:
         header = self.get_file_header()
         width, height, winning_moves = self.parse_header(header)
 
