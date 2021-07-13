@@ -254,19 +254,12 @@ class Game:
             return str(game_status)
 
     def initialise(self) -> None:
-        header = self.get_file_header()
+        header = next(self.file_pointer).rstrip("\n")
         width, height, winning_moves = self.parse_header(header)
 
         self.validate_board_setup(width, height, winning_moves)
         board = GameBoard(width, height, winning_moves, self.file_pointer)
         board.start_game()
-
-    def get_file_header(self) -> str:
-        try:
-            return next(self.file_pointer).rstrip("\n")
-        except (OSError, IOError, UnicodeError):
-            # There are some issues with opening or reading the file
-            raise GameError(9)
 
     def parse_header(self, header: str) -> Tuple[int]:
         """

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from unittest.mock import MagicMock, Mock, call, patch
 
 import pytest
@@ -446,12 +446,13 @@ class TestGameBoard:
 
 class TestGame:
     @pytest.fixture
-    def file_object(self) -> MagicMock:
-        return Mock()
+    def header(self) -> List[int]:
+        return [5, 4, 3]
 
     @pytest.fixture
-    def game(self, file_object: MagicMock) -> None:
-        return Game(file_object)
+    def game(self, header: List[int]) -> Game:
+        file_pointer = map(lambda x: f"{x}\n", [" ".join(map(str, header)), 0, 1, 2, 3])
+        return Game(file_pointer)
 
     def test_init(self) -> None:
         file_pointer = Mock()
@@ -467,7 +468,7 @@ class TestGame:
 
     @pytest.mark.parametrize("exception", (GameError, GameError))
     @patch.object(Game, "initialise")
-    def test_play_game_not_finished(
+    def test_play_game_finished(
         self, mock_initialise: MagicMock, exception, game: Game
     ) -> None:
         status = 1
@@ -476,3 +477,58 @@ class TestGame:
 
         mock_initialise.assert_called_once()
         assert game_status == str(status)
+
+    @patch.object(GameBoard, "start_game")
+    @patch.object(Game, "validate_board_setup")
+    @patch.object(GameBoard, "__init__", return_value=None)
+    def test_initialise(
+        self,
+        mock_init: MagicMock,
+        mock_validate_board_setup: MagicMock,
+        mock_start_game: MagicMock,
+        header: Tuple[int],
+        game: Game,
+    ) -> None:
+        game.initialise()
+        mock_start_game.assert_called_once()
+        mock_validate_board_setup.assert_called_once_with(*header)
+        mock_init.assert_called_once_with(*header, game.file_pointer)
+
+    def test_parse_header(self, game: Game, header: List[int]) -> None:
+        header_input = " ".join(map(str, header))
+        assert game.parse_header(header_input) == tuple(header)
+
+    @pytest.mark.parametrize("header", ("1 2 a", "1 2", "1 2 3 4"))
+    def test_parse_header_invalid_values(self, game: Game, header) -> None:
+        with pytest.raises(GameError) as exc:
+            game.parse_header(header)
+
+        assert int(str(exc.value)) == 8
+
+    def test_validate_board_setup_valid_game(self, game: Game) -> None:
+        width = 4
+        height = 5
+        winning_moves = 4
+
+        game.validate_board_setup(width, height, winning_moves)
+
+    @pytest.mark.parametrize(
+        "width,height,winning_moves", ((0, 1, 2), (3, 0, 2), (2, 1, 0))
+    )
+    def test_validate_board_setup_invalid_values(
+        self, width: int, height: int, winning_moves: int, game: Game
+    ) -> None:
+        with pytest.raises(GameError) as exc:
+            game.validate_board_setup(width, height, winning_moves)
+
+        assert int(str(exc.value)) == 8
+
+    def test_validate_board_setup_illegal_game(self, game: Game) -> None:
+        width = 3
+        height = 3
+        winning_moves = 4
+
+        with pytest.raises(GameError) as exc:
+            game.validate_board_setup(width, height, winning_moves)
+
+        assert int(str(exc.value)) == 7
