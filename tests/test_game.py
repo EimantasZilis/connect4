@@ -10,12 +10,76 @@ BASE_PATH = "game.GameChecker"
 
 class TestGameChecker:
     @pytest.fixture
-    def game_checker(self):
+    def game_checker(self) -> GameChecker:
         checker = GameChecker()
         checker.total_moves = 3
         checker.winning_moves = 2
         checker.winner = None
         return checker
+
+    @pytest.mark.parametrize("current_column", (0, 1))
+    def test_first_column_zero_col(self, current_column: int) -> None:
+        checker = GameChecker()
+        checker.current_column = current_column
+        checker.winning_moves = 2
+        assert checker.first_column == 0
+
+    @pytest.mark.parametrize("current_column,expected_col", ((2, 0), (3, 1), (4, 2)))
+    def test_first_column(self, current_column: int, expected_col: int) -> None:
+        checker = GameChecker()
+        checker.current_column = current_column
+        checker.winning_moves = 2
+        assert checker.first_column == expected_col
+
+    @pytest.mark.parametrize("current_column,expected_col", ((0, 2), (1, 3)))
+    def test_last_column(self, current_column: int, expected_col: int) -> None:
+        checker = GameChecker()
+        checker.width = 3
+        checker.current_column = current_column
+        checker.winning_moves = 2
+        assert checker.last_column == expected_col
+
+    @pytest.mark.parametrize("current_column", (2, 3, 4, 5))
+    def test_last_column_width(self, current_column: int) -> None:
+        checker = GameChecker()
+        width = 3
+        checker.width = width
+        checker.current_column = current_column
+        checker.winning_moves = 2
+        assert checker.last_column == width
+
+    @pytest.mark.parametrize("current_row", (0, 1))
+    def test_first_row_zero_row(self, current_row: int) -> None:
+        checker = GameChecker()
+        checker.height = 3
+        checker.current_row = current_row
+        checker.winning_moves = 2
+        assert checker.first_row == 0
+
+    @pytest.mark.parametrize("current_row,expected_row", ((2, 0), (3, 1), (4, 2)))
+    def test_first_row(self, current_row: int, expected_row: int) -> None:
+        checker = GameChecker()
+        checker.height = 3
+        checker.current_row = current_row
+        checker.winning_moves = 2
+        assert checker.first_row == expected_row
+
+    @pytest.mark.parametrize("current_row,expected_row", ((0, 2), (1, 3)))
+    def test_last_row(self, current_row: int, expected_row: int) -> None:
+        checker = GameChecker()
+        checker.height = 3
+        checker.current_row = current_row
+        checker.winning_moves = 2
+        assert checker.last_row == expected_row
+
+    @pytest.mark.parametrize("current_row", (2, 3, 4, 5))
+    def test_last_row_height(self, current_row: int) -> None:
+        height = 3
+        checker = GameChecker()
+        checker.height = height
+        checker.current_row = current_row
+        checker.winning_moves = 2
+        assert checker.last_row == height
 
     @patch.object(GameChecker, "_check_lines_for_wins")
     def test_check_for_wins_make_checks(

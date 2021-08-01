@@ -24,6 +24,54 @@ class GameChecker:
     number of pieces belonging to the same player.
     """
 
+    @property
+    def first_column(self) -> int:
+        """
+        Get the first column (on the left) that should be checked
+        for wins based on current piece.
+        """
+        if (first_col := self.current_column - self.winning_moves) < 0:
+            # The expected first column would be outside the board on the left.
+            # Return the actual first column on the board
+            first_col = 0
+        return first_col
+
+    @property
+    def last_column(self) -> int:
+        """
+        Get the last column (on the right) that should be checked
+        for wins based on current piece.
+        """
+        if (last_col := self.current_column + self.winning_moves) > self.width:
+            # The expected last column would be on the outside the board
+            # on the right. Return the actual last column on the board.
+            last_col = self.width
+        return last_col
+
+    @property
+    def first_row(self) -> int:
+        """
+        Get the first row (at the bottom) that should be checked
+        for wins based on current piece.
+        """
+        if (first_row := self.current_row - self.winning_moves) < 0:
+            # The expected first row would be on the outside the board
+            # at the bottom. Return the actual first row on the board.
+            first_row = 0
+        return first_row
+
+    @property
+    def last_row(self) -> int:
+        """
+        Get the last row (at the top) that should be checked
+        for wins based on current piece.
+        """
+        if (last_row := self.current_row + self.winning_moves) > self.height:
+            # The expected last row would be on the outside the board
+            # at the top. Return the actual last row on the board.
+            last_row = self.height
+        return last_row
+
     def check_for_wins(self) -> None:
         """Check if the game has been won"""
         if self.total_moves >= 2 * self.winning_moves - 1:
@@ -115,21 +163,54 @@ class GameChecker:
         # Apply a sliding window along row to find every possible
         # line and check if it has a winning combination.
 
-        # Get the first possible column to check
-        first_col = self.current_column - self.winning_moves
-        actual_starting_col = 0 if first_col < 0 else first_col
-
-        # Get the last possible column to check
-        last_col = self.current_column + self.winning_moves
-        actual_finishing_col = self.width if last_col > self.width else last_col
-
         row = [
             self.board[column][self.current_row]
-            for column in range(actual_starting_col, actual_finishing_col)
+            for column in range(self.first_column, self.last_column)
         ]
 
         # Get every possible line of length self.winning_moves
         # by applying a slidng window to the row
+        for line in sliding_window(row, self.winning_moves):
+            self.check_line_for_win(line)
+
+    def check_left_diagonal_upper_line(self) -> None:
+        """
+        Check if the player has won by looking at the left
+        diagonal pointing upwards starting with a new piece
+        """
+
+        # If the board width is bigger than the number of winning
+        # moves required going upwards, there is more than one way
+        # to build a line diagonally. Apply a sliding window along
+        # the left diagonal to find every possible line. Check if
+        # it has a winning combination.
+
+        row = [
+            self.board[col][row]
+            for col, row in zip(
+                reversed(range(self.first_column, self.last_column)),
+                range(self.first_row, self.last_row),
+            )
+        ]
+        for line in sliding_window(row, self.winning_moves):
+            self.check_line_for_win(line)
+
+    def check_right_diagonal_upper_line(self) -> None:
+        """
+        Check if the player has won by looking at the right
+        diagonal pointing upwards starting with a new piece
+        """
+
+        # Similar to check_left_diagonal_upper_line, apply a sliding
+        # window to check all possible lines.
+
+        row = [
+            self.board[col][row]
+            for col, row in zip(
+                range(self.first_column, self.last_column),
+                range(self.first_row, self.last_row),
+            )
+        ]
         for line in sliding_window(row, self.winning_moves):
             self.check_line_for_win(line)
 
@@ -140,6 +221,8 @@ class GameChecker:
             self.check_left_diagonal_line()
             self.check_right_diagonal_line()
             self.check_horizontal_lines()
+            self.check_left_diagonal_upper_line()
+            self.check_right_diagonal_upper_line()
         except GameOver as e:
             self.winner = int(str(e))
 
