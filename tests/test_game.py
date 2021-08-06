@@ -216,7 +216,7 @@ class TestGameChecker:
         mock_check_line_for_win.assert_called_once_with(line)
 
     @pytest.mark.parametrize(
-        "current_player,winning_moves, horizontal_line",
+        "current_player,winning_moves,horizontal_line",
         [
             (1, 1, [1, 0, 1, 0, None]),
             (1, 2, [1, 0, 1, 1, None]),
@@ -281,6 +281,153 @@ class TestGameChecker:
             game_checker.board[x][2] = piece
 
         game_checker.check_horizontal_lines()
+        assert game_checker.winner == None
+
+    @pytest.mark.parametrize(
+        "current_move,winning_moves,line",
+        [
+            (3, 3, [None, None, 1, 1, 1]),
+            (2, 3, [0, 1, 1, 1, None]),
+            (1, 3, [1, 1, 1, 0, None]),
+            (3, 5, [1, 1, 1, 1, 1]),
+            (1, 4, [1, 1, 1, 1, None]),
+        ],
+    )
+    def test_check_right_diagonal_upper_line_won(
+        self,
+        current_move: int,
+        winning_moves: int,
+        line: List[int],
+        game_checker: GameChecker,
+    ) -> None:
+        width = 5
+        height = 5
+        current_player = 1
+
+        game_checker.winner = None
+        game_checker.width = width
+        game_checker.height = height
+        game_checker.board = [[None for row in range(height)] for col in range(width)]
+        for x, piece in enumerate(line):
+            game_checker.board[x][x] = piece
+
+        game_checker.current_player = current_player
+        game_checker.current_column = current_move
+        game_checker.current_row = current_move
+
+        game_checker.winning_moves = winning_moves
+
+        with pytest.raises(GameOver) as exc:
+            game_checker.check_right_diagonal_upper_line()
+
+        assert game_checker.winner == current_player
+
+    @pytest.mark.parametrize(
+        "current_move,winning_moves,line",
+        [
+            (0, 5, [1, None, 1, None, 1]),
+            (1, 3, [None, 1, 0, 1, 1]),
+            (0, 5, [1, 1, 1, 1, None]),
+            (0, 4, [1, 1, 1, 0, 1]),
+        ],
+    )
+    def test_check_right_diagonal_upper_line_not_won(
+        self,
+        current_move: int,
+        winning_moves: int,
+        line: List[int],
+        game_checker: GameChecker,
+    ) -> None:
+        width = 5
+        height = 5
+        current_player = 1
+
+        game_checker.width = width
+        game_checker.height = height
+        game_checker.board = [[None for row in range(height)] for col in range(width)]
+        for x, piece in enumerate(line):
+            game_checker.board[x][x] = piece
+
+        game_checker.current_player = current_player
+        game_checker.current_column = current_move
+        game_checker.current_row = current_move
+
+        game_checker.winning_moves = winning_moves
+        game_checker.check_right_diagonal_upper_line()
+
+        assert game_checker.winner == None
+
+    @pytest.mark.parametrize(
+        "current_row,winning_moves,line",
+        [
+            (3, 3, (0, None, 1, 1, 1)),
+            (2, 3, (None, 1, 1, 1, None)),
+            (1, 3, (1, 1, 1, None, None)),
+            (3, 5, (1, 1, 1, 1, 1)),
+            (1, 4, (1, 1, 1, 1, None)),
+        ],
+    )
+    def test_check_left_diagonal_upper_line_won(
+        self,
+        current_row: int,
+        winning_moves: int,
+        line: List[int],
+        game_checker: GameChecker,
+    ) -> None:
+        width = 5
+        height = 5
+        current_player = 1
+
+        game_checker.width = width
+        game_checker.height = height
+        game_checker.board = [[None for row in range(height)] for col in range(width)]
+        for x, piece in enumerate(line):
+            game_checker.board[width - x - 1][x] = piece
+
+        game_checker.current_player = current_player
+        game_checker.current_column = width - current_row
+        game_checker.current_row = current_row
+
+        game_checker.winning_moves = winning_moves
+
+        with pytest.raises(GameOver) as exc:
+            game_checker.check_left_diagonal_upper_line()
+
+        assert game_checker.winner == current_player
+
+    @pytest.mark.parametrize(
+        "current_move,winning_moves,line",
+        [
+            (0, 5, [1, None, 1, None, 1]),
+            (1, 3, [None, 1, 0, 1, 1]),
+            (0, 5, [1, 1, 1, 1, None]),
+            (0, 4, [1, 1, 1, 0, 1]),
+        ],
+    )
+    def test_check_lef_diagonal_upper_line_not_won(
+        self,
+        current_move: int,
+        winning_moves: int,
+        line: List[int],
+        game_checker: GameChecker,
+    ) -> None:
+        width = 5
+        height = 5
+        current_player = 1
+
+        game_checker.width = width
+        game_checker.height = height
+        game_checker.board = [[None for row in range(height)] for col in range(width)]
+        for x, piece in enumerate(line):
+            game_checker.board[width - x - 1][x] = piece
+
+        game_checker.current_player = current_player
+        game_checker.current_column = current_move
+        game_checker.current_row = current_move
+
+        game_checker.winning_moves = winning_moves
+        game_checker.check_right_diagonal_upper_line()
+
         assert game_checker.winner == None
 
     @pytest.mark.parametrize(

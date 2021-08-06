@@ -182,7 +182,7 @@ class GameChecker:
         # If the board width is bigger than the number of winning
         # moves required going upwards, there is more than one way
         # to build a line diagonally. Apply a sliding window along
-        # the left diagonal to find every possible line. Check if
+        # the left diagonal to find  every possible line. Check if
         # it has a winning combination.
 
         row = [

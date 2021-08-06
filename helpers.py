@@ -32,12 +32,12 @@ def sliding_window(iterable: Optional[int], size: int) -> Generator[int, None, N
     return zip(*iters)
 
 
-def show_summary(status: int) -> None:
-    if status == 0:
+def show_summary(status: str) -> None:
+    if status == "0":
         print("Draw")
-    elif status in (1, 2):
+    elif status in ("1", "2"):
         print(f"Player {status} won")
-    elif status in map(str, range(1, 10)):
+    elif status in map(str, range(3, 10)):
         print(f"Game Error: {GAME_STATUSES[status]}")
     else:
         print(f"Unknown Error - code: {status}")
