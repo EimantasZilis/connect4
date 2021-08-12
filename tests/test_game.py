@@ -3,9 +3,36 @@ from unittest.mock import MagicMock, Mock, call, patch
 
 import pytest
 
+from config import GameCode
 from game import Game, GameBoard, GameChecker, GameError, GameOver
 
 BASE_PATH = "game.GameChecker"
+
+
+class TestGameOver:
+    @pytest.mark.parametrize("status", list(range(10)))
+    def test_valid_status(self, status: int):
+        with pytest.raises(GameOver) as exception:
+            raise GameOver(status)
+        exception.value.status == GameCode(status)
+
+    @pytest.mark.parametrize("status", ("1", None, -1, 10, "A"))
+    def test_invalid_status(self, status: int):
+        with pytest.raises(ValueError):
+            raise GameOver(status)
+
+
+class TestGameError:
+    @pytest.mark.parametrize("status", list(range(10)))
+    def test_valid_status(self, status: int):
+        with pytest.raises(GameError) as exception:
+            raise GameError(status)
+        exception.value.status == GameCode(status)
+
+    @pytest.mark.parametrize("status", ("1", None, -1, 10, "A"))
+    def test_invalid_status(self, status: int):
+        with pytest.raises(ValueError):
+            raise GameError(status)
 
 
 class TestGameChecker:
@@ -143,9 +170,10 @@ class TestGameChecker:
         game_checker.winning_moves = winning_moves
         game_checker.current_player = current_player
 
-        with pytest.raises(GameOver):
+        with pytest.raises(GameOver) as game_status:
             game_checker.check_line_for_win(line)
             assert game_checker.winner == current_player
+            assert game_status.status == GameCode(current_player)
 
     @patch.object(GameChecker, "check_line_for_win")
     def test_check_vertical_line(
@@ -687,7 +715,7 @@ class TestGame:
         game_status = game.play()
 
         mock_initialise.assert_called_once()
-        assert game_status == str(status)
+        assert game_status == GameCode(status)
 
     @patch.object(GameBoard, "start_game")
     @patch.object(Game, "validate_board_setup")

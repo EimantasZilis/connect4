@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from config import GAME_STATUSES
+from config import GAME_OUTPUT_MESSAGES, GameCode
 from helpers import ArgParser, show_summary, sliding_window
 
 
@@ -46,39 +46,14 @@ def test_sliding_window(
     assert list(sliding_window(iterable, window_size)) == expected_windows
 
 
+@pytest.mark.parametrize("status", (status for status in GameCode))
 @patch("sys.stdout", new_callable=io.StringIO)
-def test_show_summary_draw(mock_stdout: MagicMock) -> None:
-    show_summary("0")
-    assert mock_stdout.getvalue().strip() == "Draw"
+def test_show_summary_game_player_won(mock_stdout: MagicMock, status: GameCode) -> None:
+    show_summary(status)
+    assert mock_stdout.getvalue().strip() == GAME_OUTPUT_MESSAGES[status]
 
 
-@pytest.mark.parametrize(
-    "player,output", ((player, f"Player {player} won") for player in ("1", "2"))
-)
-@patch("sys.stdout", new_callable=io.StringIO)
-def test_show_summary_game_player_won(
-    mock_stdout: MagicMock, player: str, output: str
-) -> None:
-    show_summary(player)
-    assert mock_stdout.getvalue().strip() == output.strip()
-
-
-@pytest.mark.parametrize(
-    "code,output",
-    ((x, f"Game Error: {GAME_STATUSES[x]}") for x in map(str, range(3, 10))),
-)
-@patch("sys.stdout", new_callable=io.StringIO)
-def test_show_summary_game_error(
-    mock_stdout: MagicMock, code: str, output: str
-) -> None:
-    show_summary(code)
-    assert mock_stdout.getvalue().strip() == output.strip()
-
-
-@pytest.mark.parametrize("code", (-1, 11, 100, 0, "", "abcd", None))
-@patch("sys.stdout", new_callable=io.StringIO)
-def test_show_summary_unknown_error(
-    mock_stdout: MagicMock, code: Union[int, str]
-) -> None:
-    show_summary(code)
-    assert mock_stdout.getvalue().strip() == f"Unknown Error - code: {code}".strip()
+@pytest.mark.parametrize("code", (-1, 11, 100, 0, "", "abcd", None, "1", 1))
+def test_show_summary_invalid_code(code: Union[int, str]) -> None:
+    with pytest.raises(KeyError):
+        show_summary(code)

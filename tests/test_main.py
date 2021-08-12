@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from config import GameCode
 from main import ArgParser, main, start_game
 
 BASE_TEST_DIR = Path(__file__).resolve().parent / "sample_files"
@@ -10,7 +11,7 @@ BASE_TEST_DIR = Path(__file__).resolve().parent / "sample_files"
 
 def get_files():
     test_files = [
-        (folder.name, file)
+        (GameCode(int(folder.name)), file)
         for folder in BASE_TEST_DIR.iterdir()
         for file in folder.iterdir()
         if file.is_file()
@@ -26,7 +27,7 @@ def test_start_game(status: str, file: Path) -> None:
 def test_start_game_file_doesnt_exist() -> None:
     missing_file = BASE_TEST_DIR / "I_don't_exist.txt"
     assert not missing_file.exists()
-    assert start_game(missing_file) == "9"
+    assert start_game(missing_file) == GameCode(9)
     assert not missing_file.exists()
 
 
@@ -40,7 +41,7 @@ def test_main(
     mock_show_summary: MagicMock,
     mock_start_game: MagicMock,
 ) -> None:
-    status = "3"
+    status = GameCode.INCOMPLETE_GAME
     filename = Path("some_path")
     mock_get_path.return_value = filename
     mock_start_game.return_value = status
