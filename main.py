@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from config import GameCode
 from game import Game
 from helpers import ArgParser, show_summary
 
@@ -11,7 +12,7 @@ def start_game(file: Path) -> str:
             game = Game(fp)
             return game.play()
     except (OSError, IOError, UnicodeError):
-        return "9"
+        return GameCode.FILE_ERROR
 
 
 def main() -> None:

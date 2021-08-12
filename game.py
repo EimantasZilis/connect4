@@ -1,6 +1,7 @@
 from itertools import cycle
 from typing import List, Optional, TextIO, Tuple
 
+from config import GameCode
 from helpers import sliding_window
 
 
@@ -11,9 +12,15 @@ class GameOver(Exception):
     of the players or if there is a draw.
     """
 
+    def __init__(self, status: GameCode) -> None:
+        self.status = GameCode(status)
+
 
 class GameError(Exception):
     """An exception to indicate that there was an error in the game"""
+
+    def __init__(self, status: GameCode) -> None:
+        self.status = GameCode(status)
 
 
 class GameChecker:
@@ -223,8 +230,8 @@ class GameChecker:
             self.check_horizontal_lines()
             self.check_left_diagonal_upper_line()
             self.check_right_diagonal_upper_line()
-        except GameOver as e:
-            self.winner = int(str(e))
+        except GameOver as exception:
+            self.winner = exception.status.value
 
 
 class GameBoard(GameChecker):
@@ -332,9 +339,9 @@ class Game:
     def play(self) -> None:
         try:
             self.initialise()
-        except (GameOver, GameError) as game_status:
+        except (GameOver, GameError) as game_over:
             # Change game_status exception object into a string
-            return str(game_status)
+            return game_over.status
 
     def initialise(self) -> None:
         header = next(self.file_pointer).rstrip("\n")
