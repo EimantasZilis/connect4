@@ -5,12 +5,12 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from config import GAME_OUTPUT_MESSAGES, GameCode
-from helpers import ArgParser, show_summary, sliding_window
+from game_solver.config import GAME_OUTPUT_MESSAGES, GameCode
+from game_solver.helpers import ArgParser, show_summary, sliding_window
 
 
 class TestArgParser:
-    @patch("helpers.argparse.ArgumentParser")
+    @patch("game_solver.helpers.argparse.ArgumentParser")
     def test_init(self, mock_arg_parser: MagicMock) -> None:
         arguments = "yes"
         mock_parser = Mock()
@@ -53,7 +53,7 @@ def test_show_summary_game_player_won(mock_stdout: MagicMock, status: GameCode) 
     assert mock_stdout.getvalue().strip() == GAME_OUTPUT_MESSAGES[status]
 
 
-@pytest.mark.parametrize("code", (-1, 11, 100, 0, "", "abcd", None, "1", 1))
+@pytest.mark.parametrize("code", (-1, 11, 100, "", "abcd", None, "1"))
 def test_show_summary_invalid_code(code: Union[int, str]) -> None:
     with pytest.raises(KeyError):
         show_summary(code)

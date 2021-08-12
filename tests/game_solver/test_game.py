@@ -3,34 +3,34 @@ from unittest.mock import MagicMock, Mock, call, patch
 
 import pytest
 
-from config import GameCode
-from game import Game, GameBoard, GameChecker, GameError, GameOver
+from game_solver.config import GameCode
+from game_solver.game import Game, GameBoard, GameChecker, GameError, GameOver
 
 BASE_PATH = "game.GameChecker"
 
 
 class TestGameOver:
     @pytest.mark.parametrize("status", list(range(10)))
-    def test_valid_status(self, status: int):
+    def test_valid_status(self, status: int) -> None:
         with pytest.raises(GameOver) as exception:
             raise GameOver(status)
         exception.value.status == GameCode(status)
 
     @pytest.mark.parametrize("status", ("1", None, -1, 10, "A"))
-    def test_invalid_status(self, status: int):
+    def test_invalid_status(self, status: int) -> None:
         with pytest.raises(ValueError):
             raise GameOver(status)
 
 
 class TestGameError:
     @pytest.mark.parametrize("status", list(range(10)))
-    def test_valid_status(self, status: int):
+    def test_valid_status(self, status: int) -> None:
         with pytest.raises(GameError) as exception:
             raise GameError(status)
         exception.value.status == GameCode(status)
 
     @pytest.mark.parametrize("status", ("1", None, -1, 10, "A"))
-    def test_invalid_status(self, status: int):
+    def test_invalid_status(self, status: int) -> None:
         with pytest.raises(ValueError):
             raise GameError(status)
 
@@ -532,7 +532,7 @@ class TestGameBoard:
         file_object = Mock()
         return GameBoard(width, height, winning_moves, file_object)
 
-    def test_init(self):
+    def test_init(self) -> None:
         width = 3
         height = 4
         winning_moves = 2

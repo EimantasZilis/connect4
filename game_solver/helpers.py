@@ -3,7 +3,7 @@ from itertools import tee
 from pathlib import Path
 from typing import Generator, Optional
 
-from config import GAME_OUTPUT_MESSAGES, GameCode
+from game_solver.config import GAME_OUTPUT_MESSAGES, GameCode
 
 
 class ArgParser:

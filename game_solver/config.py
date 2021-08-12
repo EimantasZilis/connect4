@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import IntEnum
 
 
-class GameCode(Enum):
+class GameCode(IntEnum):
     DRAW = 0
     PLAYER_1_WIN = 1
     PLAYER_2_WIN = 2

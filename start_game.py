@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from config import GameCode
-from game import Game
-from helpers import ArgParser, show_summary
+from game_solver.config import GameCode
+from game_solver.game import Game
+from game_solver.helpers import ArgParser, show_summary
 
 
 def start_game(file: Path) -> str:

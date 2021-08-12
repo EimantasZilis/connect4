@@ -1,22 +1,24 @@
 from pathlib import Path
+from typing import List, Tuple
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from config import GameCode
-from main import ArgParser, main, start_game
+from game_solver.config import GameCode
+from start_game import ArgParser, main, start_game
 
-BASE_TEST_DIR = Path(__file__).resolve().parent / "sample_files"
+BASE_TEST_DIR = Path(__file__).resolve().parent / "sample_games"
 
 
-def get_files():
-    test_files = [
-        (GameCode(int(folder.name)), file)
+@pytest.fixture
+def get_files() -> List[Tuple[GameCode, Path]]:
+    """Returns a list of tuples with game code and filepath pairs"""
+    return [
+        (GameCode[folder.name.upper()], file)
         for folder in BASE_TEST_DIR.iterdir()
         for file in folder.iterdir()
         if file.is_file()
     ]
-    return test_files
 
 
 @pytest.mark.parametrize("status,file", get_files())
@@ -31,8 +33,8 @@ def test_start_game_file_doesnt_exist() -> None:
     assert not missing_file.exists()
 
 
-@patch("main.start_game")
-@patch("main.show_summary")
+@patch("start_game.start_game")
+@patch("start_game.show_summary")
 @patch.object(ArgParser, "get_path")
 @patch.object(ArgParser, "__init__", return_value=None)
 def test_main(

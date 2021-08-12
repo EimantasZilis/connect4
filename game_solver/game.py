@@ -1,8 +1,8 @@
 from itertools import cycle
 from typing import List, Optional, TextIO, Tuple
 
-from config import GameCode
-from helpers import sliding_window
+from game_solver.config import GameCode
+from game_solver.helpers import sliding_window
 
 
 class GameOver(Exception):

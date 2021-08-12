@@ -5,4 +5,4 @@ SHELL := /bin/bash
 git-hooks:
 	chmod +x githooks/*
 	mkdir -p .git/hooks
-	cd .git/hooks && ln -sf ../../githooks/* .
+	cd ../.git/hooks && ln -sf ../../githooks/* .
