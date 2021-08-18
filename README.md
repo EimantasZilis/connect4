@@ -1,17 +1,16 @@
 # connect4
 
-This repo contains a game checker software based on the [Connect4](https://en.wikipedia.org/wiki/Connect_Four) game. While the traditional game is based on 6x7 grid, the software was generalised to work on any grid size. 
+This repo contains a game checker software based on the [Connect4](https://en.wikipedia.org/wiki/Connect_Four) game. While the traditional game is based on 6 x 7 grid with 4 pieces required to win, the software was generalised to arbitrary numbers and sizes. It can check any game of any grid size and any number of pieces required to win.
 
 To run the game checker, install Python 3.9 and use:
 ```
-python start_game.py path_to_game_file
+python check_game.py path_to_game_file
 ```
-
-`path_to_game_file` is a mandatory argument with a path to a file that describes the game setup and moves taken. It will play through the game in the background and will summarise if the game has been won, drawn or if there has been some kind of an error.
+It takes filepath as a single argument that describes the game setup and moves taken. It will play through the game in the background and will summarise if the game has been won, drawn or if there has been some kind of an error.
 
 ## How it works
 ### Inputs: the game file
-In order to check the game, a mandatory `path_to_game_file` argument needs to be specified. It should point to a text-based file that has the following format:
+In order to check the game, a filepath needs to be specified. It should point to a text-based file that has the following format:
 
 1. The first line describes the game setup and is composed of three space-delimited integers such as
 ```
@@ -27,20 +26,20 @@ The traditional game is played on a 7 x 6 board with 4 pieces required to win. T
 7 6 4
 ```
 
-2. The rest of the file is used to described the player moves. Each line represents a move starting with player one and alternating between the two on each line. A move is desribed by a single positive integer indicating which column the player chose to drop the piece in. The file should end after the game has been won or drawn. Any additional moves will be detected as an invalid game.
+2. The rest of the file is used to described the player moves. Each line represents a move starting with player one and alternates between both players on each line. A move is desribed by a single positive integer indicating which column the player chose to drop the piece in. The file should end after the game has been won or drawn. Any additional moves will be detected as an invalid game.
 
 For example, the following game represents a 3 x 4 game with 3 moves required to win:
 ```
 3 4 3
-1 - 1
-2 - 2
-3 - 1
-1 - 2
-3 - 1
-3 - 2
-1 - 1
-3 - 2
-2 - 1
+1
+2
+3
+1
+3
+3
+1
+3
+2
 ```
 This particular game is won by player 1 because there three pieces in a row along a diagonal:
 ```

@@ -5,7 +5,7 @@ from game_solver.game import Game
 from game_solver.helpers import ArgParser, show_summary
 
 
-def start_game(file: Path) -> str:
+def start_checking(file: Path) -> str:
     """Use the game file to make moves and play the game"""
     try:
         with file.open(mode="r") as fp:
@@ -19,7 +19,7 @@ def main() -> None:
     arg_parser = ArgParser()
     file = arg_parser.get_path()
 
-    status = start_game(file)
+    status = start_checking(file)
     show_summary(status)
 
 
