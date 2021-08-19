@@ -4,5 +4,5 @@ SHELL := /bin/bash
 .PHONY: git-hooks
 git-hooks:
 	chmod +x githooks/*
-	mkdir -p .git/hooks
-	cd ../.git/hooks && ln -sf ../../githooks/* .
+	mkdir -p ../.git/hooks
+	ln -s -f ../../development/githooks/pre-commit ../.git/hooks/pre-commit

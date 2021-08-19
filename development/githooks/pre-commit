@@ -1,26 +1,12 @@
 #!/usr/bin/env bash
 
 # Git pre-commit hook to check staged Python files for formatting issues with
-# isort and black.
-#
-# This requires that isort and black are installed and runnable in the environment running
+# isort and black.  This requires that isort and black are installed and runnable in the environment running
 # the pre-commit hook.
 #
 # When running, this first checks for unstaged changes to staged files, and if
 # there are any, it will exit with an error. Files with unstaged changes will be
 # printed.
-#
-# If all staged files have no unstaged changes, it will run black against them,
-# leaving the formatting changes unstaged. Changed files will be printed.
-#
-# BUGS: This does not leave staged changes alone when used with the -a flag to
-# git commit, due to the fact that git stages ALL unstaged files when that flag
-# is used.
-#
-# Note that we don't enclose $PYTHON_FILES in double quotes as this caused problems
-# with newline chars from the original diff. This works for most files but would fail
-# if you have files that contain spaces in the names.
-# Find all staged Python files, and exit early if there aren't any.
 
 PYTHON_FILES=$(git diff --name-only --cached --diff-filter=AM | grep --color=never '\.py$')
 if [ -z "${PYTHON_FILES[@]}"  ]; then
