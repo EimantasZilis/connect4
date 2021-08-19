@@ -27,8 +27,8 @@ The traditional game is played on a 7 x 6 board with 4 pieces required to win. T
 7 6 4
 ```
 
-#### 2. Player moves
-The rest of the file is used to described the player moves. Each line represents a move starting with player one and alternates between both players on each line. A move is desribed by a single positive integer indicating which column the player chose to drop the piece in. The file should end after the game has been won or drawn. Any additional moves will be detected as an invalid game.
+#### 2. Specify player moves
+The rest of the file describes the player moves. Each line represents a move starting with player one and alternates between both players on each line. A move is desribed by a single positive integer indicating which column the player chose to drop the piece in. The file should end after the game has been won or if there is a draw. Any additional moves will be detected as an invalid game.
 
 For example, the following game represents a 3 x 4 game with 3 moves required to win:
 ```
@@ -86,10 +86,11 @@ brew install anaconda
 ```
 and create connect4 environment using
 ```
-conda env create -f environment.yml
+conda env create -f development/environment.yml
 ```
 Setup git hooks using
 ```bash
+cd development
 make git-hooks
 ```
 and it will symlink the content of `.githooks` into it. The current `pre-commit` hook supports file formatting using `black` and `isort` and `autoflake`.
